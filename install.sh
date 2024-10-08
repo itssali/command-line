@@ -20,18 +20,24 @@ done
 
 echo "Installing AN Command Line..."
 
-# Create ~/bin if it doesn't exist
+# Create the destination directory if it doesn't exist
 mkdir -p ~/bin
 
-# Move the command line executable to ~/bin
+# Check if the an-cli executable exists in the dist folder
+if [ ! -f "dist/an-cli" ]; then
+    echo "Error: 'dist/an-cli' not found. Make sure you have built the executable."
+    exit 1
+fi
+
+# Move the an-cli executable to ~/bin
 mv dist/an-cli ~/bin/an
 
-# Add ~/bin to PATH if not already there
-if [[ ":$PATH:" != *":$HOME/bin:"* ]]; then
-  echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bash_profile
-  echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
-  echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
-  echo "Added ~/bin to your PATH. Please restart your terminal or run 'source ~/.bash_profile', 'source ~/.bashrc', or 'source ~/.zshrc' to refresh your environment."
+# Check if ~/bin is already in the PATH
+if ! echo "$PATH" | grep -q "$HOME/bin"; then
+    # Add ~/bin to PATH if not present
+    echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bash_profile
+    echo 'export PATH="$HOME/bin:$PATH"' >> ~/.zshrc
+    echo "Added ~/bin to your PATH. Please restart your terminal or run 'source ~/.bash_profile' or 'source ~/.zshrc' to refresh your environment."
 fi
 
 echo "AN Command Line has been installed successfully!"
