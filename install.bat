@@ -1,11 +1,16 @@
 @echo off
-REM Download the executable using PowerShell
-powershell -Command "Invoke-WebRequest -Uri https://github.com/itssali/command-line/blob/main/install.bat -OutFile an.exe"  REM Replace with the actual URL of the executable
+setlocal
 
-REM Move the executable to Program Files
-move an.exe "C:\Program Files\an.exe"
+:: Create directory if it doesn't exist
+if not exist "%USERPROFILE%\bin" (
+    mkdir "%USERPROFILE%\bin"
+)
 
-REM Add to PATH
-setx PATH "%PATH%;C:\Program Files"
+:: Download the executable from GitHub Releases
+powershell -Command "Invoke-WebRequest -Uri https://github.com/itssali/command-line/raw/main/an.exe -OutFile %USERPROFILE%\bin\an.exe"
+
+:: Add %USERPROFILE%\bin to PATH
+setx PATH "%USERPROFILE%\bin;%PATH%"
 
 echo AN Command Line installed successfully! You can use it by typing 'an' in your command prompt.
+endlocal
