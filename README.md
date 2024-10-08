@@ -39,19 +39,3 @@ This command will open your default web browser and search for "how to make cupc
 ## License
 
 This project is licensed under the MIT License.
-```
-
-### Instructions to Add the README
-
-1. **Create a `README.md` file**:
-   - In your repository `itssali/command-line`, click on "Add file" -> "Create new file".
-   - Name it `README.md`.
-
-2. **Paste the Markdown content**:
-   - Copy the above content and paste it into the `README.md` file.
-
-3. **Commit the changes**:
-   - Scroll down and enter a commit message (e.g., "Add README for installation instructions").
-   - Click on "Commit new file".
-
-This README will provide clear and concise installation instructions for your command line tool! If you need any adjustments or additional sections, just let me know!
