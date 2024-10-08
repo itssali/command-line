@@ -4,10 +4,24 @@ AN Command Line is a custom command line interface that allows you to use a vari
 
 ## Installation
 
-To install the AN Command Line tool, run the following command in your terminal (works for both Bash and Zsh):
+To install the AN Command Line tool, follow the appropriate instructions for your operating system:
+
+### macOS and Linux
+
+For macOS and Linux, run the following command in your terminal (works for both Bash and Zsh):
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/itssali/command-line/main/install.sh | bash
+```
+
+This command will download and execute the installation script, which sets up the `an` command globally on your system.
+
+### Windows
+
+For Windows, you can install the AN Command Line tool by running the following command in your Command Prompt:
+
+```cmd
+curl -L https://raw.githubusercontent.com/itssali/command-line/main/install.bat -o install.bat && install.bat
 ```
 
 This command will download and execute the installation script, which sets up the `an` command globally on your system.
@@ -34,7 +48,7 @@ This command will open your default web browser and search for "how to make cupc
 ## Requirements
 
 - This command line tool does not require any additional software installations like Python.
-- It is designed to work seamlessly on macOS and Unix-based systems.
+- It is designed to work seamlessly on macOS, Linux, and Windows.
 
 ## License
 
