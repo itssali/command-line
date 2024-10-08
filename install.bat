@@ -12,15 +12,15 @@ IF NOT EXIST "%ProgramFiles%\AN Command Line" (
     mkdir "%ProgramFiles%\AN Command Line"
 )
 
-:: Move the files to the target directory
+:: Move the executable to the target directory
 copy /y "dist\an.exe" "%ProgramFiles%\AN Command Line\an.exe"
 
 :: Create a command to call the executable
 echo @echo off > "%ProgramFiles%\AN Command Line\an.bat"
 echo "%ProgramFiles%\AN Command Line\an.exe" %%* >> "%ProgramFiles%\AN Command Line\an.bat"
 
-:: Add to the PATH variable for the current session
-set "PATH=%PATH%;%ProgramFiles%\AN Command Line"
+:: Create a symbolic link in the system path
+mklink "%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\an.exe" "%ProgramFiles%\AN Command Line\an.exe"
 
 echo AN Command Line has been installed successfully!
 echo You can now use 'an' commands globally.
