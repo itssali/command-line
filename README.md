@@ -26,7 +26,7 @@ Once installed, you can use the following commands:
 To perform a Google search, use the following command:
 
 ```bash
-go how to make cupcakes
+an go how to make cupcakes
 ```
 
 This command will open your default web browser and search for "how to make cupcakes" on Google.
