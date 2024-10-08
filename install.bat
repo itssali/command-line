@@ -13,11 +13,11 @@ IF NOT EXIST "%ProgramFiles%\AN Command Line" (
 )
 
 :: Move the files to the target directory
-copy /y "an.py" "%ProgramFiles%\AN Command Line\an.py"
+copy /y "dist\an.exe" "%ProgramFiles%\AN Command Line\an.exe"
 
-:: Create a command to call the Python script
+:: Create a command to call the executable
 echo @echo off > "%ProgramFiles%\AN Command Line\an.bat"
-echo python "%ProgramFiles%\AN Command Line\an.py" %%* >> "%ProgramFiles%\AN Command Line\an.bat"
+echo "%ProgramFiles%\AN Command Line\an.exe" %%* >> "%ProgramFiles%\AN Command Line\an.bat"
 
 :: Add to the PATH variable for the current session
 set "PATH=%PATH%;%ProgramFiles%\AN Command Line"
