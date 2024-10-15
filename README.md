@@ -1,55 +1,39 @@
-# AN Command Line
+---
+title: AN Command Line Interface
+description: A simple command line tool to streamline your development workflow.
+date: "2024-10-15"
+url: 
+published: true
+repository: https://github.com/itssali/an-command-line
+languages: 
+---
 
-AN Command Line is a custom command line interface that allows you to use a variety of commands easily.
+## AN Command Line Interface
 
-## Installation
+The **AN Command Line Interface** is a custom command line tool designed to enhance your productivity by providing easy access to various commands and features. With it, you can execute simple tasks, check for updates, and display information efficiently.
 
-To install the AN Command Line tool, follow the appropriate instructions for your operating system:
+### Prerequisites
 
-### macOS and Linux
+Before installing the AN Command Line Interface, make sure you have Node.js and npm installed on your system. Follow these steps to download and install them:
 
-For macOS and Linux, run the following command in your terminal (works for both Bash and Zsh):
+1. **Download Node.js**:
+   - Visit the [Node.js official website](https://nodejs.org/).
+   - Download the installer for your operating system (Windows, macOS, or Linux).
+   - Run the installer and follow the instructions to complete the installation.
 
-```bash
-curl -sSL https://raw.githubusercontent.com/itssali/command-line/main/install.sh | bash
-```
+2. **Verify npm Installation**:
+   - Once Node.js is installed, npm (Node Package Manager) is included automatically.
+   - Open your terminal and run the following command to check if npm is installed:
 
-This command will download and execute the installation script, which sets up the `an` command globally on your system.
+     ```bash
+     npm -v
+     ```
 
-### Windows
+   - If you see a version number, npm is successfully installed.
 
-For Windows, you can install the AN Command Line tool by running the following command in your Command Prompt:
+### Installation
 
-```cmd
-curl -L https://raw.githubusercontent.com/itssali/command-line/main/install.bat -o install.bat && install.bat
-```
-
-This command will download and execute the installation script, which sets up the `an` command globally on your system.
-
-### Commands
-
-Once installed, you can use the following commands:
-
-- `an --version` or `an version`: Show the current version of the AN Command Line.
-- `an --update` or `an update`: Update the AN Command Line to the latest release.
-- `an --help` or `an help`: Display help information about available commands.
-- `an --commands` or `an commands`: Show all available commands.
-
-### Example Usage
-
-To perform a Google search, use the following command:
+To install the AN Command Line Interface globally, run the following command in your terminal:
 
 ```bash
-an go how to make cupcakes
-```
-
-This command will open your default web browser and search for "how to make cupcakes" on Google.
-
-## Requirements
-
-- This command line tool does not require any additional software installations like Python.
-- It is designed to work seamlessly on macOS, Linux, and Windows.
-
-## License
-
-This project is licensed under the MIT License.
+npm install -g an-command-line
