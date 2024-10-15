@@ -1,0 +1,21 @@
+{
+  "name": "an-command-line",
+  "version": "1.0.0",
+  "description": "AN Command Line is a custom CLI tool.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "an": "./index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "figlet": "^1.8.0",
+    "inquirer": "^12.0.0"
+  }
+}
