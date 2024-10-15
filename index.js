@@ -9,7 +9,7 @@ import path from 'path';
 import open from 'open'; // Import the open package
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.0.3';
+const version = '1.0.5';
 const userFilePath = path.join(__dirname, 'user.json');
 
 // Function to display ASCII art
@@ -43,9 +43,14 @@ const handleCommands = async (command) => {
       break;
     case '--update':
     case 'update':
-      console.log('To update the command line tool, please run the following command:');
-      console.log('npm install -g an-command-line');
-      break;        
+      console.log('Updating command line...');
+      try {
+        execSync('npm install -g an-command-line', { stdio: 'inherit' });
+        console.log('Updated to the latest version.');
+      } catch (error) {
+        console.error('Update failed:', error.message);
+      }
+      break;
     case '--help':
     case 'help':
     case '--commands':
