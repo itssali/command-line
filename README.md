@@ -38,5 +38,3 @@ sudo npm install -g an-command-line
 ```
 
 > **Note**: The `sudo` command is required on macOS and many Linux distributions to grant elevated privileges for global installations and updates. If you are on Windows, run your terminal as an administrator to perform the update.
-
-```
