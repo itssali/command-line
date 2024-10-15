@@ -41,12 +41,11 @@ const handleCommands = async (command) => {
     case 'version':
       console.log(`Version: ${version}`);
       break;
-    case '--update':
-    case 'update':
-      console.log('Updating command line...');
-      execSync('git pull', { stdio: 'inherit' });  // Assuming the repo is set up for git
-      console.log(`Updated to version: ${version}`);
-      break;
+      case '--update':
+        case 'update':
+          console.log('To update the command line tool, please run the following command:');
+          console.log('npm install -g an-command-line');
+          break;        
     case '--help':
     case 'help':
     case '--commands':
