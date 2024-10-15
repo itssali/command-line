@@ -1,6 +1,6 @@
 {
   "name": "an-command-line",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AN Command Line is a custom CLI tool.",
   "main": "index.js",
   "type": "module",
