@@ -7,9 +7,10 @@ import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import open from 'open'; // Import the open package
+import { exec } from 'child_process'; // Import exec to check latest version
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.0.5';
+const version = '1.0.6';
 const userFilePath = path.join(__dirname, 'user.json');
 
 // Function to display ASCII art
@@ -29,6 +30,21 @@ const checkOrSaveName = async () => {
   }
 };
 
+// Function to check for the latest version from npm
+const checkForUpdates = async () => {
+  try {
+    const latestVersion = execSync('npm show an-command-line version', { encoding: 'utf8' }).trim();
+    if (latestVersion !== version) {
+      console.log(`A new version (${latestVersion}) is available!`);
+      console.log(`To update, run: npm install -g an-command-line`);
+    } else {
+      console.log('You are using the latest version.');
+    }
+  } catch (error) {
+    console.error('Could not check for updates:', error.message);
+  }
+};
+
 // Handle different commands
 const handleCommands = async (command) => {
   const name = await checkOrSaveName();
@@ -36,10 +52,12 @@ const handleCommands = async (command) => {
   switch (command) {
     case '':
       displayWelcome(name);
+      await checkForUpdates(); // Check for updates on startup
       break;
     case '--version':
     case 'version':
-      console.log(`Version: ${version}`);
+      console.log(`Current Version: ${version}`);
+      await checkForUpdates(); // Check for updates when version is requested
       break;
     case '--update':
     case 'update':
@@ -57,7 +75,7 @@ const handleCommands = async (command) => {
     case 'commands':
       console.log(`
 Available commands:
-  an --version (or an version): Show version.
+  an --version (or an version): Show current version and available updates.
   an --update (or an update): Update to the latest version.
   an --help (or an help): Show available commands.
   an --commands (or an commands): Show all commands.
