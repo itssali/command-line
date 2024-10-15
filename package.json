@@ -1,6 +1,6 @@
 {
   "name": "an-command-line",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AN Command Line is a custom CLI tool.",
   "main": "index.js",
   "type": "module",
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "figlet": "^1.8.0",
-    "inquirer": "^12.0.0"
+    "inquirer": "^12.0.0",
+    "open": "^10.1.0"
   }
 }

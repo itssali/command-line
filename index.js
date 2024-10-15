@@ -6,9 +6,10 @@ import { execSync } from 'child_process'; // For shell commands
 import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import open from 'open'; // Import the open package
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.0.0';
+const version = '1.0.1';
 const userFilePath = path.join(__dirname, 'user.json');
 
 // Function to display ASCII art
@@ -56,7 +57,18 @@ Available commands:
   an --update (or an update): Update to the latest version.
   an --help (or an help): Show available commands.
   an --commands (or an commands): Show all commands.
+  an go <text>: Search Google for the specified text.
       `);
+      break;
+    case 'go':
+      const searchQuery = process.argv.slice(3).join(' ');
+      if (searchQuery) {
+        const url = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+        await open(url); // Open the search URL in the default browser
+        console.log(`Searching Google for: ${searchQuery}`);
+      } else {
+        console.log('Please provide a search query.');
+      }
       break;
     default:
       console.log(`Unknown command: ${command}`);
