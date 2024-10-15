@@ -1,13 +1,3 @@
----
-title: AN Command Line Interface
-description: A simple command line tool to streamline your development workflow.
-date: "2024-10-15"
-url: 
-published: true
-repository: https://github.com/itssali/an-command-line
-languages: 
----
-
 ## AN Command Line Interface
 
 The **AN Command Line Interface** is a custom command line tool designed to enhance your productivity by providing easy access to various commands and features. With it, you can execute simple tasks, check for updates, and display information efficiently.
