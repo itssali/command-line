@@ -9,7 +9,7 @@ import path from 'path';
 import open from 'open'; // Import the open package
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.0.7';
+const version = '1.0.8';
 const userFilePath = path.join(__dirname, 'user.json');
 
 // Function to display ASCII art
