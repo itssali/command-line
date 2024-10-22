@@ -62,7 +62,7 @@ const browseDirectories = async () => {
     console.clear();
     console.log(chalk.cyan(`Browsing: ${currentDir}`));
     console.log(chalk.cyan(`Search: ${searchQuery}`));
-    console.log('Use arrow keys to navigate, Enter to select and change directory, Esc to exit, and type to search');
+    console.log('Use arrow keys to navigate, Enter to copy "cd" command, Esc to exit, and type to search');
     
     const start = Math.max(0, selectedIndex - Math.floor(pageSize / 2));
     const end = Math.min(filteredFiles.length, start + pageSize);
@@ -98,27 +98,6 @@ const browseDirectories = async () => {
         selectedIndex++;
         displayFiles();
       }
-    } else if (key === '\u001b[C') {
-      const selectedFile = filteredFiles[selectedIndex];
-      const selectedPath = path.join(currentDir, selectedFile);
-
-      if (statSync(selectedPath).isDirectory()) {
-        currentDir = selectedPath;
-        files = readdirSync(currentDir);
-        filteredFiles = files;
-        searchQuery = '';
-        selectedIndex = 0;
-        displayFiles();
-      }
-    } else if (key === '\u001b[D') {
-      if (currentDir !== '/') {
-        currentDir = path.dirname(currentDir);
-        files = readdirSync(currentDir);
-        filteredFiles = files;
-        searchQuery = '';
-        selectedIndex = 0;
-        displayFiles();
-      }
     } else if (key === '\r') {
       const selectedFile = filteredFiles[selectedIndex];
       const selectedPath = path.join(currentDir, selectedFile);
@@ -132,6 +111,15 @@ const browseDirectories = async () => {
         console.log(chalk.yellow(`${selectedFile} is not a directory. Press any key to continue...`));
         process.stdin.once('data', () => displayFiles());
       }    
+    } else if (key === '\u001b[D') {
+      if (currentDir !== '/') {
+        currentDir = path.dirname(currentDir);
+        files = readdirSync(currentDir);
+        filteredFiles = files;
+        searchQuery = '';
+        selectedIndex = 0;
+        displayFiles();
+      }
     } else if (key === '\u001b') {
       process.exit();
     } else if (key.match(/[a-zA-Z0-9-_]/)) {
@@ -169,14 +157,22 @@ const handleCommands = async () => {
       try {
         execSync('npm install -g an-command-line', { stdio: 'inherit' });
         console.log('Updated to the latest version.');
-        name = await saveName();
-        displayWelcome(name);
       } catch (error) {
         console.error('Update failed:', error.message);
       }
       break;
     case 'browse':
       await browseDirectories();
+      break;
+    case 'go':
+      if (args.length > 1) {
+        const searchQuery = args.slice(1).join(' ');
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+        console.log(chalk.blue(`Searching Google for: ${searchQuery}`));
+        spawn('open', [searchUrl]);
+      } else {
+        console.log(chalk.red('Please provide a search query after the "go" command.'));
+      }
       break;
     case '--change':
     case 'change':
@@ -200,6 +196,7 @@ Available commands:
   an --commands (or an commands): Show all commands.
   an --change name (or an change name): Change the ASCII welcome name.
   an browse: Browse directories and navigate using arrow keys.
+  an go <search terms>: Search Google with the provided query.
       `);
       break;
     default:
