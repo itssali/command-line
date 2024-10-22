@@ -1,6 +1,6 @@
 {
   "name": "an-command-line",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "Directory browser CLI tool",
   "type": "module",
   "bin": {
@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "chalk": "^5.0.0",
+    "clipboardy": "^4.0.0",
     "figlet": "^1.5.2",
     "inquirer": "^9.0.0"
   }
