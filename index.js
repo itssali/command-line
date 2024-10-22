@@ -3,15 +3,16 @@
 import inquirer from 'inquirer';
 import figlet from 'figlet';
 import { execSync, spawn } from 'child_process';
-import { readdirSync, statSync, appendFileSync, readFileSync, writeFileSync, existsSync } from 'fs';
+import { readdirSync, statSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import os from 'os';
 import chalk from 'chalk';
+import clipboardy from 'clipboardy';
+
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.0.9';
+const version = '1.1.0 test LOL';
 const userFilePath = path.join(__dirname, 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
@@ -121,14 +122,16 @@ const browseDirectories = async () => {
     } else if (key === '\r') {
       const selectedFile = filteredFiles[selectedIndex];
       const selectedPath = path.join(currentDir, selectedFile);
-
+    
       if (statSync(selectedPath).isDirectory()) {
-        console.log(`CD:${selectedPath}`);
+        const cdCommand = `cd ${selectedPath}`;
+        clipboardy.writeSync(cdCommand);
+        console.log(chalk.green(`Copied ${cdCommand} to your clipboard.`));
         process.exit(0);
       } else {
         console.log(chalk.yellow(`${selectedFile} is not a directory. Press any key to continue...`));
         process.stdin.once('data', () => displayFiles());
-      }
+      }    
     } else if (key === '\u001b') {
       process.exit();
     } else if (key.match(/[a-zA-Z0-9-_]/)) {
@@ -143,55 +146,6 @@ const browseDirectories = async () => {
       displayFiles();
     }
   });
-};
-
-const updateShellConfig = async () => {
-  const homeDir = os.homedir();
-  const shells = [
-    { name: 'bash', rcFile: '.bashrc' },
-    { name: 'zsh', rcFile: '.zshrc' },
-    { name: 'fish', rcFile: '.config/fish/config.fish' }
-  ];
-
-  for (const shell of shells) {
-    const rcPath = path.join(homeDir, shell.rcFile);
-    if (existsSync(rcPath)) {
-      const rcContent = readFileSync(rcPath, 'utf8');
-      const functionName = 'an';
-      const functionContent = shell.name === 'fish' 
-        ? `
-function ${functionName}
-    if test "$argv[1]" = "browse"
-        set new_path (node ${__dirname}/index.js browse | grep '^CD:' | sed 's/^CD://')
-        if test -n "$new_path"
-            cd "$new_path"
-        end
-    else
-        node ${__dirname}/index.js $argv
-    end
-end
-`
-        : `
-${functionName}() {
-  if [ "$1" = "browse" ]; then
-    local new_path=$(node ${__dirname}/index.js browse | grep '^CD:' | sed 's/^CD://')
-    if [ -n "$new_path" ]; then
-      cd "$new_path"
-    fi
-  else
-    node ${__dirname}/index.js "$@"
-  fi
-}
-`;
-
-      if (!rcContent.includes(functionName)) {
-        appendFileSync(rcPath, functionContent);
-        console.log(`Updated ${shell.name} configuration in ${rcPath}`);
-      }
-    }
-  }
-
-  console.log('Shell configurations updated. Please restart your terminal or run "source ~/.bashrc" (or equivalent) to apply changes.');
 };
 
 const handleCommands = async () => {
@@ -215,7 +169,6 @@ const handleCommands = async () => {
       try {
         execSync('npm install -g an-command-line', { stdio: 'inherit' });
         console.log('Updated to the latest version.');
-        await updateShellConfig();
         name = await saveName();
         displayWelcome(name);
       } catch (error) {
@@ -248,10 +201,6 @@ Available commands:
   an --change name (or an change name): Change the ASCII welcome name.
   an browse: Browse directories and navigate using arrow keys.
       `);
-      break;
-    case '--install':
-    case 'install':
-      await updateShellConfig();
       break;
     default:
       console.log(`Unknown command: ${command}`);
