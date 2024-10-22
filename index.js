@@ -12,7 +12,7 @@ import clipboardy from 'clipboardy';
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.1.0';
+const version = '1.1.1';
 const userFilePath = path.join(__dirname, 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
