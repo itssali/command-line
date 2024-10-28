@@ -4,16 +4,31 @@ import inquirer from 'inquirer';
 import figlet from 'figlet';
 import { execSync, spawn } from 'child_process';
 import { readdirSync, statSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { mkdir, readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import chalk from 'chalk';
 import clipboardy from 'clipboardy';
+import os from 'os';
+import fetch from 'node-fetch';
 
+const getUserDataDir = () => {
+  const platform = process.platform;
+  const home = os.homedir();
+  
+  switch (platform) {
+    case 'win32':
+      return path.join(process.env.APPDATA, 'an-cli');
+    case 'darwin':
+      return path.join(home, 'Library', 'Application Support', 'an-cli');
+    default:
+      return path.join(home, '.config', 'an-cli');
+  }
+};
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.1.1';
-const userFilePath = path.join(__dirname, 'user.json');
+const version = '1.1.2';
+const userFilePath = path.join(getUserDataDir(), 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
 let searchQuery = '';
@@ -24,9 +39,20 @@ const displayWelcome = async (name) => {
 };
 
 const saveName = async (newName = null) => {
+  const userDir = getUserDataDir();
+  try {
+    await mkdir(userDir, { recursive: true });
+  } catch (error) {
+    if (error.code !== 'EEXIST') {
+      console.error('Error creating user directory:', error);
+      return null;
+    }
+  }
+
   const { name } = newName
     ? { name: newName }
     : await inquirer.prompt([{ type: 'input', name: 'name', message: 'Enter your name:' }]);
+  
   await writeFile(userFilePath, JSON.stringify({ name }));
   return name;
 };
@@ -188,16 +214,61 @@ const handleCommands = async () => {
     case 'help':
     case '--commands':
     case 'commands':
-      console.log(`
-Available commands:
-  an --version (or an version): Show current version and available updates.
-  an --update (or an update): Update to the latest version.
-  an --help (or an help): Show available commands.
-  an --commands (or an commands): Show all commands.
-  an --change name (or an change name): Change the ASCII welcome name.
-  an browse: Browse directories and navigate using arrow keys.
-  an go <search terms>: Search Google with the provided query.
-      `);
+      console.log(chalk.cyan(`
+AN Command Line Interface v${version}
+
+Available commands (all commands can also be used with -- prefix, e.g., --help):
+
+  an version: Show current version and check for updates
+  an update: Update to the latest version
+  an help: Show this help message
+  an commands: Show this help message
+  an change name: Change your welcome name
+  an browse: Browse directories with fuzzy search
+  an go <search terms>: Search Google directly
+  an system: Display system information
+  an weather <city>: Show weather for specified city
+
+Navigation in browse mode:
+  ↑↓ Arrow keys: Navigate through files
+  ←  Left arrow: Go to parent directory
+  ↵  Enter: Copy cd command to clipboard
+  ESC: Exit browse mode
+  Type: Filter files (fuzzy search)
+`));
+      break;
+    case 'system':
+      console.log(chalk.cyan('System Information:'));
+      console.log(`OS: ${os.type()} ${os.release()}`);
+      console.log(`Platform: ${os.platform()}`);
+      console.log(`CPU Architecture: ${os.arch()}`);
+      console.log(`Memory: ${Math.round(os.totalmem() / 1024 / 1024 / 1024)}GB`);
+      console.log(`Free Memory: ${Math.round(os.freemem() / 1024 / 1024 / 1024)}GB`);
+      console.log(`CPU Cores: ${os.cpus().length}`);
+      console.log(`User Home Directory: ${os.homedir()}`);
+      console.log(`System Uptime: ${Math.floor(os.uptime() / 3600)} hours`);
+      break;
+
+    case 'weather':
+      if (!args[1]) {
+        console.log(chalk.red('Please provide a city name (e.g., an weather London)'));
+        break;
+      }
+      try {
+        const city = args.slice(1).join('+');
+        const response = await fetch(`https://wttr.in/${city}?format=j1`);
+        const data = await response.json();
+        
+        const current = data.current_condition[0];
+        console.log(chalk.cyan(`Weather in ${data.nearest_area[0].areaName[0].value}, ${data.nearest_area[0].country[0].value}:`));
+        console.log(`Temperature: ${current.temp_C}°C (${current.temp_F}°F)`);
+        console.log(`Conditions: ${current.weatherDesc[0].value}`);
+        console.log(`Humidity: ${current.humidity}%`);
+        console.log(`Wind: ${current.windspeedKmph} km/h`);
+        console.log(`Feels like: ${current.FeelsLikeC}°C`);
+      } catch (error) {
+        console.log(chalk.red('City not found or service unavailable. Try again later.'));
+      }
       break;
     default:
       console.log(`Unknown command: ${command}`);

@@ -14,6 +14,9 @@ The **AN Command Line Interface** is a custom command line tool designed to enha
 
 - **Custom Name**: Set and change your welcome name for a personalized experience.
 
+- **System Information**: Get detailed information about your system using the `system` command.
+- **Weather Information**: Check the current weather for any city using the `weather` command.
+
 ### Prerequisites
 
 Before installing the AN Command Line Interface, make sure you have Node.js and npm installed on your system. Follow these steps to download and install them:
@@ -35,10 +38,10 @@ Before installing the AN Command Line Interface, make sure you have Node.js and 
 
 ### Installation
 
-To install the AN Command Line Interface globally, run the following command in your terminal:
+Install the CLI tool locally without requiring admin privileges:
 
 ```bash
-npm install -g an-command-line
+npm install an-command-line
 ```
 
 ### Updating
@@ -69,6 +72,9 @@ sudo npm install -g an-command-line
 
 - **Performing Google Searches**: Type `go <your search query>` to search Google directly from the command line.
 
+- **System Information**: Use the `system` command to get detailed information about your system.
+- **Weather Information**: Use the `weather` command to check the current weather for any city.
+
 ### Example
 
 1. To search for a file named "report":
@@ -80,3 +86,10 @@ sudo npm install -g an-command-line
    ```bash
    an go best programming languages
    ```
+
+The installation will automatically:
+1. Create necessary user directories
+2. Add the CLI to your PATH
+3. Set up user-specific configuration
+
+No sudo or admin privileges required!
