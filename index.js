@@ -27,7 +27,7 @@ const getUserDataDir = () => {
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.1.2';
+const version = '1.1.3';
 const userFilePath = path.join(getUserDataDir(), 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
@@ -181,10 +181,11 @@ const handleCommands = async () => {
     case 'update':
       console.log('Updating command line...');
       try {
-        execSync('npm install -g an-command-line', { stdio: 'inherit' });
+        execSync('npm update an-command-line', { stdio: 'inherit' });
         console.log('Updated to the latest version.');
       } catch (error) {
         console.error('Update failed:', error.message);
+        console.log(chalk.yellow('Try running: npm update an-command-line'));
       }
       break;
     case 'browse':

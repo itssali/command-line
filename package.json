@@ -1,6 +1,6 @@
 {
   "name": "an-command-line",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Directory browser CLI tool",
   "type": "module",
   "bin": {

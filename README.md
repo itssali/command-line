@@ -46,19 +46,11 @@ npm install an-command-line
 
 ### Updating
 
-To update the AN Command Line Interface to the latest version, use the following command:
+To update the AN Command Line Interface to the latest version, simply run:
 
 ```bash
-an update
+npm update an-command-line
 ```
-
-#### OR 
-
-```bash
-sudo npm install -g an-command-line
-```
-
-> **Note**: The `sudo` command is required on macOS and many Linux distributions to grant elevated privileges for global installations and updates. If you are on Windows, run your terminal as an administrator to perform the update.
 
 ### Usage
 
