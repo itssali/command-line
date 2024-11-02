@@ -1,13 +1,10 @@
 {
-  "name": "@itssali/an-command-line",
+  "name": "an-command-line",
   "version": "1.1.3",
   "description": "Directory browser CLI tool",
   "type": "module",
   "bin": {
     "an": "index.js"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
