@@ -38,18 +38,10 @@ Before installing the AN Command Line Interface, make sure you have Node.js and 
 
 ### Installation
 
-You can install the CLI tool in two ways:
-
-1. From npm (recommended):
+Install the CLI tool:
 
 ```bash
 npm install an-command-line
-```
-
-2. From GitHub Packages:
-
-```bash
-npm install @itssali/an-command-line
 ```
 
 ### Updating
