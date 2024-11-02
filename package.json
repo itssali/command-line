@@ -1,13 +1,10 @@
 {
-  "name": "@itssali/an-command-line",
-  "version": "1.1.4",
+  "name": "an-command-line",
+  "version": "1.1.5",
   "description": "Directory browser CLI tool",
   "type": "module",
   "bin": {
     "an": "index.js"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "repository": {
     "type": "git",
@@ -15,7 +12,8 @@
   },
   "preferGlobal": false,
   "scripts": {
-    "postinstall": "node scripts/setup.js"
+    "postinstall": "node scripts/setup.js",
+    "prepublishOnly": "node scripts/publish.js"
   },
   "dependencies": {
     "chalk": "^5.0.0",
