@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from 'fs/promises';
+import { mkdir, writeFile, access } from 'fs/promises';
+import { constants } from 'fs';
 import path from 'path';
 import os from 'os';
 
@@ -14,20 +15,60 @@ const setup = async () => {
   try {
     await mkdir(binDir, { recursive: true });
     
-    // Add bin directory to PATH if not already present
-    const profile = platform === 'win32'
-      ? path.join(home, '.profile')
-      : path.join(home, '.bashrc');
+    // Determine shell configuration file
+    let shellFiles = [];
+    if (platform === 'darwin') { // macOS
+      shellFiles = [
+        { path: path.join(home, '.zshrc'), shell: 'zsh' },
+        { path: path.join(home, '.bashrc'), shell: 'bash' }
+      ];
+    } else if (platform === 'win32') {
+      shellFiles = [{ path: path.join(home, '.profile'), shell: 'profile' }];
+    } else { // Linux and others
+      shellFiles = [{ path: path.join(home, '.bashrc'), shell: 'bash' }];
+    }
 
-    const pathEntry = `\nexport PATH="$PATH:${binDir}"\n`;
-    await writeFile(profile, pathEntry, { flag: 'a' });
-    
-    console.log('Setup complete! Please restart your terminal or run:');
-    console.log(`source ${profile}`);
+    const pathEntry = `\n# Added by an-command-line setup\nexport PATH="$PATH:${binDir}"\n`;
+    let modifiedFiles = [];
+
+    for (const shellFile of shellFiles) {
+      try {
+        // Check if file exists
+        try {
+          await access(shellFile.path, constants.F_OK);
+        } catch {
+          // Create the file if it doesn't exist
+          await writeFile(shellFile.path, '', { flag: 'a' });
+        }
+
+        // Check if PATH entry already exists
+        const currentContent = await import('fs').then(fs => 
+          fs.readFileSync(shellFile.path, 'utf8')
+        );
+        
+        if (!currentContent.includes(binDir)) {
+          await writeFile(shellFile.path, pathEntry, { flag: 'a' });
+          modifiedFiles.push(shellFile);
+        }
+      } catch (error) {
+        console.warn(`Warning: Could not modify ${shellFile.shell} configuration:`, error.message);
+      }
+    }
+
+    if (modifiedFiles.length > 0) {
+      console.log('\nSetup complete! Please do one of the following:');
+      console.log('1. Restart your terminal');
+      console.log('2. Or run the following command:');
+      modifiedFiles.forEach(file => {
+        console.log(`   source ${file.path}`);
+      });
+    } else {
+      console.log('\nSetup complete! Your PATH is already configured.');
+    }
   } catch (error) {
     console.error('Setup failed:', error);
+    process.exit(1);
   }
 };
 
 setup();
-

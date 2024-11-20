@@ -7,6 +7,8 @@ import { readdirSync, statSync } from 'fs';
 import { mkdir, readFile, writeFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { dirname } from 'path';
+import fs from 'fs';
 import chalk from 'chalk';
 import clipboardy from 'clipboardy';
 import os from 'os';
@@ -27,7 +29,7 @@ const getUserDataDir = () => {
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.1.13';
+const version = '1.1.17';
 const userFilePath = path.join(getUserDataDir(), 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
@@ -81,81 +83,194 @@ const checkForUpdates = async () => {
 };
 
 const browseDirectories = async () => {
-  let files = readdirSync(currentDir);
+  // ANSI escape codes for cursor and screen manipulation
+  const CLEAR_SCREEN = '\x1b[2J\x1b[H';
+  const MOVE_TO_TOP = '\x1b[H';
+  const CLEAR_TO_BOTTOM = '\x1b[J';
+  const HIDE_CURSOR = '\x1b[?25l';
+  const SHOW_CURSOR = '\x1b[?25h';
+
+  // Universal Unicode symbols that work in all terminals
+  const DIRECTORY_ICON = '📂';  // folder
+  const FILE_ICON = '📄';       // file
+
+  const getFileIcon = (filename) => {
+    return FILE_ICON;
+  };
+
+  const getDirectoryIcon = (dirname) => {
+    return DIRECTORY_ICON;
+  };
+
+  let files = [];
+  try {
+    files = readdirSync(currentDir);
+  } catch (error) {
+    console.error(chalk.red(`Error reading directory: ${error.message}`));
+    process.exit(1);
+  }
   let filteredFiles = files;
 
   const displayFiles = () => {
-    console.clear();
-    console.log(chalk.cyan(`Browsing: ${currentDir}`));
-    console.log(chalk.cyan(`Search: ${searchQuery}`));
-    console.log('Use arrow keys to navigate, Enter to copy "cd" command, Esc to exit, and type to search');
-    
-    const start = Math.max(0, selectedIndex - Math.floor(pageSize / 2));
-    const end = Math.min(filteredFiles.length, start + pageSize);
+    // Move to top and clear everything below
+    process.stdout.write(MOVE_TO_TOP + CLEAR_TO_BOTTOM);
 
-    filteredFiles.slice(start, end).forEach((file, index) => {
-      const fullPath = path.join(currentDir, file);
-      const isDirectory = statSync(fullPath).isDirectory();
-      const fileIcon = isDirectory ? '📁' : '📄';
-      if (start + index === selectedIndex) {
-        console.log(chalk.green(`> ${fileIcon} ${file}`));
+    const lines = [];
+    lines.push(chalk.cyan(`Browsing: ${currentDir}`));
+    lines.push(chalk.cyan(`Search: ${searchQuery}`));
+    lines.push('Use ←→↑↓ to navigate, Enter to copy "cd" command, Esc to exit, type to search\n');
+    
+    if (filteredFiles.length === 0) {
+      if (searchQuery) {
+        lines.push(chalk.yellow('No matching files found'));
       } else {
-        console.log(`  ${fileIcon} ${file}`);
+        lines.push(chalk.yellow('Directory is empty'));
       }
-    });
+    } else {
+      const start = Math.max(0, selectedIndex - Math.floor(pageSize / 2));
+      const end = Math.min(filteredFiles.length, start + pageSize);
+
+      filteredFiles.slice(start, end).forEach((file, index) => {
+        const fullPath = path.join(currentDir, file);
+        let isDirectory = false;
+        try {
+          isDirectory = statSync(fullPath).isDirectory();
+        } catch (error) {
+          return;
+        }
+        const icon = isDirectory ? DIRECTORY_ICON : FILE_ICON;
+        
+        if (start + index === selectedIndex) {
+          lines.push(chalk.green(`> ${icon}  ${file}`));
+        } else {
+          lines.push(`  ${icon}  ${file}`);
+        }
+      });
+    }
+
+    // Output new display
+    process.stdout.write(lines.join('\n') + '\n');
   };
 
+  // Initial setup
+  process.stdout.write(CLEAR_SCREEN + HIDE_CURSOR);
   displayFiles();
 
   process.stdin.setRawMode(true);
   process.stdin.resume();
   process.stdin.setEncoding('utf8');
 
+  const cleanup = () => {
+    process.stdout.write(SHOW_CURSOR);
+    process.stdin.setRawMode(false);
+    process.stdin.pause();
+  };
+
+  // Handle process termination
+  process.on('SIGINT', () => {
+    cleanup();
+    process.exit();
+  });
+
   process.stdin.on('data', (key) => {
-    if (key === '\u0003') {
+    const keyCode = key.toString();
+
+    // Handle Ctrl+C
+    if (keyCode === '\u0003') {
+      cleanup();
       process.exit();
-    } else if (key === '\u001b[A') {
+    }
+
+    // Handle arrow keys
+    if (keyCode === '\u001b[A') { // Up arrow
       if (selectedIndex > 0) {
         selectedIndex--;
         displayFiles();
       }
-    } else if (key === '\u001b[B') {
+    } else if (keyCode === '\u001b[B') { // Down arrow
       if (selectedIndex < filteredFiles.length - 1) {
         selectedIndex++;
         displayFiles();
       }
-    } else if (key === '\r') {
+    } else if (keyCode === '\u001b[C') { // Right arrow
+      if (filteredFiles.length === 0) return;
+      
       const selectedFile = filteredFiles[selectedIndex];
       const selectedPath = path.join(currentDir, selectedFile);
-    
-      if (statSync(selectedPath).isDirectory()) {
-        const cdCommand = `cd ${selectedPath}`;
-        clipboardy.writeSync(cdCommand);
-        console.log(chalk.green(`Copied ${cdCommand} to your clipboard.`));
-        process.exit(0);
-      } else {
-        console.log(chalk.yellow(`${selectedFile} is not a directory. Press any key to continue...`));
-        process.stdin.once('data', () => displayFiles());
-      }    
-    } else if (key === '\u001b[D') {
+      
+      try {
+        if (statSync(selectedPath).isDirectory()) {
+          currentDir = selectedPath;
+          files = readdirSync(currentDir);
+          filteredFiles = files;
+          searchQuery = '';
+          selectedIndex = 0;
+          displayFiles();
+        } else {
+          console.log(chalk.yellow(`\n${selectedFile} is not a directory. Press any key to continue...`));
+          process.stdin.once('data', () => displayFiles());
+        }
+      } catch (error) {
+        console.log(chalk.red(`\nError accessing ${selectedFile}: ${error.message}`));
+        setTimeout(displayFiles, 2000);
+      }
+    } else if (keyCode === '\r') { // Enter
+      if (filteredFiles.length === 0) return;
+      
+      const selectedFile = filteredFiles[selectedIndex];
+      const selectedPath = path.join(currentDir, selectedFile);
+      
+      try {
+        if (statSync(selectedPath).isDirectory()) {
+          const cdCommand = `cd "${selectedPath}"`;
+          clipboardy.writeSync(cdCommand);
+          cleanup();
+          console.clear();
+          console.log(chalk.green(`Copied ${cdCommand} to your clipboard.`));
+          process.exit(0);
+        } else {
+          console.log(chalk.yellow(`\n${selectedFile} is not a directory. Press any key to continue...`));
+          process.stdin.once('data', () => displayFiles());
+        }
+      } catch (error) {
+        console.log(chalk.red(`\nError accessing ${selectedFile}: ${error.message}`));
+        setTimeout(displayFiles, 2000);
+      }
+    } else if (keyCode === '\u001b[D') { // Left arrow
       if (currentDir !== '/') {
         currentDir = path.dirname(currentDir);
-        files = readdirSync(currentDir);
-        filteredFiles = files;
-        searchQuery = '';
+        try {
+          files = readdirSync(currentDir);
+          filteredFiles = files;
+          searchQuery = '';
+          selectedIndex = 0;
+          displayFiles();
+        } catch (error) {
+          console.error(chalk.red(`Error reading directory: ${error.message}`));
+          setTimeout(() => {
+            currentDir = path.join(currentDir, '..');
+            displayFiles();
+          }, 2000);
+        }
+      }
+    } else if (keyCode === '\u001b') { // Escape
+      cleanup();
+      console.clear();
+      process.exit();
+    } else if (keyCode === '\u007f') { // Backspace
+      if (searchQuery.length > 0) {
+        searchQuery = searchQuery.slice(0, -1);
+        filteredFiles = files.filter(file => 
+          file.toLowerCase().includes(searchQuery.toLowerCase())
+        );
         selectedIndex = 0;
         displayFiles();
       }
-    } else if (key === '\u001b') {
-      process.exit();
-    } else if (key.match(/[a-zA-Z0-9-_]/)) {
-      searchQuery += key;
-      filteredFiles = files.filter(file => file.toLowerCase().includes(searchQuery.toLowerCase()));
-      selectedIndex = 0;
-      displayFiles();
-    } else if (key === '\u007f') {
-      searchQuery = searchQuery.slice(0, -1);
-      filteredFiles = files.filter(file => file.toLowerCase().includes(searchQuery.toLowerCase()));
+    } else if (/^[\x20-\x7E]$/.test(keyCode)) { // Printable characters
+      searchQuery += keyCode;
+      filteredFiles = files.filter(file => 
+        file.toLowerCase().includes(searchQuery.toLowerCase())
+      );
       selectedIndex = 0;
       displayFiles();
     }
@@ -233,6 +348,7 @@ Available commands (all commands can also be used with -- prefix, e.g., --help):
 Navigation in browse mode:
   ↑↓ Arrow keys: Navigate through files
   ←  Left arrow: Go to parent directory
+  →  Right arrow: Enter directory
   ↵  Enter: Copy cd command to clipboard
   ESC: Exit browse mode
   Type: Filter files (fuzzy search)
