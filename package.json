@@ -1,6 +1,6 @@
 {
   "name": "@itssali/an-command-line",
-  "version": "1.1.17",
+  "version": "1.1.19",
   "description": "Directory browser CLI tool",
   "type": "module",
   "bin": {
@@ -12,7 +12,6 @@
   },
   "preferGlobal": false,
   "scripts": {
-    "postinstall": "node scripts/setup.js",
     "prepublishOnly": "node scripts/publish.js"
   },
   "dependencies": {
