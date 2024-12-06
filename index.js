@@ -29,7 +29,7 @@ const getUserDataDir = () => {
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.1.19';
+const version = '1.1.23';
 const userFilePath = path.join(getUserDataDir(), 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;

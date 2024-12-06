@@ -1,6 +1,6 @@
 {
-  "name": "@itssali/an-command-line",
-  "version": "1.1.21",
+  "name": "an-command-line",
+  "version": "1.1.22",
   "description": "Directory browser CLI tool",
   "type": "module",
   "bin": {
