@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# Template for an-wrapper.sh
+# Copy this file to an-wrapper.sh and update the path to your index.js
+
 # Get the current directory from the command output
-output=$(node "/Users/alinasser/Library/Mobile Documents/com~apple~CloudDocs/Coding/command-line/index.js" "$@")
+output=$(node "/path/to/your/command-line/index.js" "$@")
 
 # Check if the output starts with "cd "
 if [[ $output == cd* ]]; then

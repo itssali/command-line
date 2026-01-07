@@ -5,12 +5,8 @@ import figlet from 'figlet';
 import { execSync, spawn } from 'child_process';
 import { readdirSync, statSync } from 'fs';
 import { mkdir, readFile, writeFile } from 'fs/promises';
-import { fileURLToPath } from 'url';
 import path from 'path';
-import { dirname } from 'path';
-import fs from 'fs';
 import chalk from 'chalk';
-import clipboardy from 'clipboardy';
 import os from 'os';
 import fetch from 'node-fetch';
 
@@ -28,16 +24,38 @@ const getUserDataDir = () => {
   }
 };
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const version = '1.1.23';
+const version = '1.1.24';
 const userFilePath = path.join(getUserDataDir(), 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
 let searchQuery = '';
 const pageSize = process.stdout.rows - 5;
 
+const createGradientText = (text) => {
+  const lines = text.split('\n');
+  const colors = [
+    chalk.hex('#FF6B6B'),
+    chalk.hex('#FF8E53'),
+    chalk.hex('#FFA500'),
+    chalk.hex('#FFD93D'),
+    chalk.hex('#6BCB77'),
+    chalk.hex('#4D96FF'),
+  ];
+
+  return lines.map((line, i) => {
+    const colorIndex = Math.floor((i / lines.length) * colors.length);
+    return colors[colorIndex](line);
+  }).join('\n');
+};
+
 const displayWelcome = async (name) => {
-  console.log(figlet.textSync(`Welcome ${name}`));
+  const welcomeText = figlet.textSync(`Welcome ${name}`, {
+    font: 'ANSI Shadow',
+    horizontalLayout: 'default',
+    verticalLayout: 'default'
+  });
+  console.log(createGradientText(welcomeText));
+  console.log(chalk.dim('━'.repeat(process.stdout.columns || 80)));
 };
 
 const saveName = async (newName = null) => {
@@ -94,14 +112,6 @@ const browseDirectories = async () => {
   const DIRECTORY_ICON = '📂';  // folder
   const FILE_ICON = '📄';       // file
 
-  const getFileIcon = (filename) => {
-    return FILE_ICON;
-  };
-
-  const getDirectoryIcon = (dirname) => {
-    return DIRECTORY_ICON;
-  };
-
   let files = [];
   try {
     files = readdirSync(currentDir);
@@ -116,15 +126,19 @@ const browseDirectories = async () => {
     process.stdout.write(MOVE_TO_TOP + CLEAR_TO_BOTTOM);
 
     const lines = [];
-    lines.push(chalk.cyan(`Browsing: ${currentDir}`));
-    lines.push(chalk.cyan(`Search: ${searchQuery}`));
-    lines.push('Use ←→↑↓ to navigate, Enter to copy "cd" command, Esc to exit, type to search\n');
-    
+    lines.push(chalk.hex('#4D96FF').bold('┌' + '─'.repeat(Math.min(78, process.stdout.columns - 2)) + '┐'));
+    lines.push(chalk.hex('#4D96FF')('│ ') + chalk.cyan.bold('Directory Browser') + ' '.repeat(Math.min(61, process.stdout.columns - 20)) + chalk.hex('#4D96FF')('│'));
+    lines.push(chalk.hex('#4D96FF')('└' + '─'.repeat(Math.min(78, process.stdout.columns - 2)) + '┘'));
+    lines.push(chalk.dim('📍 Current: ') + chalk.white(currentDir));
+    lines.push(chalk.dim('🔍 Search:  ') + chalk.yellow(searchQuery || '(type to search)'));
+    lines.push(chalk.dim('━'.repeat(Math.min(80, process.stdout.columns))));
+    lines.push(chalk.dim('↑↓: Navigate │ →: Enter Directory │ ←: Parent │ Enter: Open │ Esc: Exit\n'));
+
     if (filteredFiles.length === 0) {
       if (searchQuery) {
-        lines.push(chalk.yellow('No matching files found'));
+        lines.push(chalk.yellow('  ⚠️  No matching files found'));
       } else {
-        lines.push(chalk.yellow('Directory is empty'));
+        lines.push(chalk.yellow('  📭 Directory is empty'));
       }
     } else {
       const start = Math.max(0, selectedIndex - Math.floor(pageSize / 2));
@@ -139,11 +153,11 @@ const browseDirectories = async () => {
           return;
         }
         const icon = isDirectory ? DIRECTORY_ICON : FILE_ICON;
-        
+
         if (start + index === selectedIndex) {
-          lines.push(chalk.green(`> ${icon}  ${file}`));
+          lines.push(chalk.hex('#6BCB77').bold(`  ▸ ${icon}  ${file}`));
         } else {
-          lines.push(`  ${icon}  ${file}`);
+          lines.push(chalk.dim(`    ${icon}  ${file}`));
         }
       });
     }
@@ -216,21 +230,32 @@ const browseDirectories = async () => {
       }
     } else if (keyCode === '\r') { // Enter
       if (filteredFiles.length === 0) return;
-      
+
       const selectedFile = filteredFiles[selectedIndex];
       const selectedPath = path.join(currentDir, selectedFile);
-      
+
       try {
         if (statSync(selectedPath).isDirectory()) {
-          const cdCommand = `cd "${selectedPath}"`;
-          clipboardy.writeSync(cdCommand);
+          // Navigate into the directory
+          currentDir = selectedPath;
+          files = readdirSync(currentDir);
+          filteredFiles = files;
+          searchQuery = '';
+          selectedIndex = 0;
+          displayFiles();
+        } else {
+          // Open file in default application
           cleanup();
           console.clear();
-          console.log(chalk.green(`Copied ${cdCommand} to your clipboard.`));
+          console.log(chalk.green(`Opening ${selectedFile}...`));
+          try {
+            const openCommand = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
+            spawn(openCommand, [selectedPath], { detached: true, stdio: 'ignore' }).unref();
+            console.log(chalk.dim(`File opened in default application.`));
+          } catch (err) {
+            console.log(chalk.yellow(`Could not open file: ${err.message}`));
+          }
           process.exit(0);
-        } else {
-          console.log(chalk.yellow(`\n${selectedFile} is not a directory. Press any key to continue...`));
-          process.stdin.once('data', () => displayFiles());
         }
       } catch (error) {
         console.log(chalk.red(`\nError accessing ${selectedFile}: ${error.message}`));
@@ -348,8 +373,8 @@ Available commands (all commands can also be used with -- prefix, e.g., --help):
 Navigation in browse mode:
   ↑↓ Arrow keys: Navigate through files
   ←  Left arrow: Go to parent directory
-  →  Right arrow: Enter directory
-  ↵  Enter: Copy cd command to clipboard
+  →  Right arrow: Enter directory (same as Enter)
+  ↵  Enter: Open directory/file
   ESC: Exit browse mode
   Type: Filter files (fuzzy search)
 `));

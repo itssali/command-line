@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Template for an-config.sh
+# Copy this file to an-config.sh and update the path to your an-wrapper.sh
+
+# Function definition for an-browse
+an-browse() {
+    bash "/path/to/your/command-line/scripts/an-wrapper.sh" "$@"
+}

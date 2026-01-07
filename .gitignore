@@ -1,3 +1,19 @@
-.npmrc
+# Dependencies
 node_modules/
-publish.js
+
+# npm auth token
+.npmrc
+
+# Scripts with local/personal paths
+scripts/an-wrapper.sh
+scripts/an-config.sh
+
+# User configuration
+.claude/
+
+# OS Files
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
