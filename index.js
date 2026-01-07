@@ -24,7 +24,7 @@ const getUserDataDir = () => {
   }
 };
 
-const version = '1.1.24';
+const version = '1.1.26';
 const userFilePath = path.join(getUserDataDir(), 'user.json');
 let currentDir = process.cwd();
 let selectedIndex = 0;
